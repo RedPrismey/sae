@@ -7,11 +7,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public final class DBConnection {
-    private static Connection conn;
     private DBConnection() {}
 
     public static Connection getConnection() throws SQLException {
-        if (conn == null) {
             Dotenv dotenv = Dotenv.load();
 
             String host = "localhost";
@@ -21,9 +19,6 @@ public final class DBConnection {
             String pass = dotenv.get("POSTGRES_PASSWORD");
 
             String url = String.format("jdbc:postgresql://%s:%s/%s", host, port, db);
-            conn = DriverManager.getConnection(url, user, pass);
-        }
-
-        return conn;
+            return DriverManager.getConnection(url, user, pass);
     }
 }
