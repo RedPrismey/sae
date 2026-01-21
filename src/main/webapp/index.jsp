@@ -15,7 +15,7 @@
     <h1>Bienvenue sur Pronte</h1>
     <p>Accédez rapidement :</p>
     <a class="button" href="login.jsp">Se connecter</a>
-    <a class="button" href="signup.jsp">S'inscrire</a>
+    <a class="button" href="sign_up.jsp">S'inscrire</a>
     <a class="button" href="prof">Espace Professeur</a>
     <a class="button" href="etudiant">Espace Étudiant</a>
     <p style="margin-top:12px;"><a class="link" href="hello-servlet">Hello Servlet</a></p>

@@ -9,43 +9,53 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 
-@WebServlet("/LoginServlet")
+@WebServlet("/Login_Servlet")
 public class Login_Servlet extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
-        
-        String u = request.getParameter("username");
-        String p = request.getParameter("mdp");
-        
-        //Appel à la classe BDD   pour test connexion
-        boolean estValide = false; 
-        String role = ""; 
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String u = request.getParameter("username");
+    String p = request.getParameter("mdp");
 
-        // À supprimer
-        if ("admin".equals(u) && "1234".equals(p)) {
-            estValide = true;
-            role = "Admin";
-        } else if ("etudiant".equals(u) && "1234".equals(p)) {
-            estValide = true;
-            role = "Etudiant";
-        }
+    try {
         
+        User user = User.findByUsername(u);
 
-        if (estValide) {
+       
+        if (user != null && user.getPassword().equals(p)) {
+            
+            
             HttpSession session = request.getSession();
-            session.setAttribute("user", u); 
-            session.setAttribute("role", role);
-            switch (role) {
-                case "Admin" -> response.sendRedirect("admin_dashboard.jsp");
-                case "Etudiant" -> response.sendRedirect("etudiant_dashboard.jsp");
-                default -> response.sendRedirect("prof_dashboard.jsp");
+            session.setAttribute("user", user.getUsername());
+            
+            
+            String roleStr = user.getRole().name(); 
+            
+           
+            String roleSession = switch(user.getRole()) {
+                case admin -> "Admin";
+                case student -> "Etudiant";
+                case teacher -> "Prof";
+            };
+            session.setAttribute("role", roleSession);
+
+           
+            switch (user.getRole()) {
+                case admin -> response.sendRedirect("admin"); // Vers AdminDashboardServlet
+                case student -> response.sendRedirect("etudiant"); // Vers EtudiantServlet
+                case teacher -> response.sendRedirect("prof"); // Vers ProfServlet
             }
 
         } else {
+           
             request.setAttribute("errorMessage", "Identifiant ou mot de passe incorrect.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
+
+    } catch (Exception e) {
+        e.printStackTrace(); 
+        request.setAttribute("errorMessage", "Erreur technique lors de la connexion.");
+        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
+}
 }

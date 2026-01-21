@@ -53,7 +53,7 @@ public class EtudiantServlet extends HttpServlet {
         Integer studentId = null;
         Map<String, String> notesAndModules = new HashMap<>();
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection conn = DBConnection.getConnection()) {
 
             // Étape A : Récupérer l'ID de l'utilisateur à partir de son username
             String getIdSql = "SELECT id FROM users WHERE username = ?";
@@ -97,7 +97,7 @@ public class EtudiantServlet extends HttpServlet {
         request.setAttribute("notesBySemester", notesAndModules);
 
         // Affichage de la page JSP
-        request.getRequestDispatcher("etudiant_dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/etudiant_dashboard.jsp").forward(request, response);
     }
 
     /**

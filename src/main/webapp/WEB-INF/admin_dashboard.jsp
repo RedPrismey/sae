@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="org.insa.sae.Specialty" %>
+<%@ page import="org.insa.sae.*" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,25 +44,47 @@
     <% } %>
 
     <div id="inscription" class="card">
-        <h2>Inscrire un étudiant</h2>
+        <h2>Valider l'inscription administrative</h2>
         <form action="AdminActionServlet" method="post">
             <input type="hidden" name="action" value="createEtudiant">
+            
             <div class="form-row">
-                <input type="text" name="nom" placeholder="Nom" required>
-                <input type="text" name="prenom" placeholder="Prénom" required>
-            </div>
-            <div class="form-row">
-                <input type="text" name="ine" placeholder="Numéro INE" required>
-                <select name="specialite">
-                    <option value="Informatique">Informatique</option>
-                    <option value="Cybersecurite">Cybersécurité</option>
-                    <option value="Reseau">Réseau</option>
+                <select name="usernameEtudiant" required>
+                    <option value="" disabled selected>-- Sélectionner un étudiant --</option>
+                    <% 
+                    List<User> etudiantsDispos = (List<User>) request.getAttribute("listeEtudiants");
+                    if (etudiantsDispos != null) {
+                        for (User u : etudiantsDispos) { 
+                    %>
+                        <option value="<%= u.getUsername() %>">
+                            <%= u.getName() %> <%= u.getSurname() %> (<%= u.getUsername() %>)
+                        </option>
+                    <% 
+                        } 
+                    } 
+                    %>
                 </select>
             </div>
+            
             <div class="form-row">
-                 <input type="text" name="photo" placeholder="URL Photo (optionnel)">
+                <input type="text" name="ine" placeholder="Numéro INE à attribuer" required>
+                
+                <select name="specialtyId" required>
+                    <option value="" disabled selected>-- Spécialité --</option>
+                    <% 
+                    List<Specialty> specs = (List<Specialty>) request.getAttribute("listeSpecialites");
+                    if (specs != null) {
+                        for (Specialty s : specs) { 
+                    %>
+                        <option value="<%= s.getId() %>"><%= s.getName() %></option>
+                    <% 
+                        } 
+                    } 
+                    %>
+                </select>
             </div>
-            <button type="submit">Inscrire l'étudiant</button>
+            
+            <button type="submit">Valider l'inscription</button>
         </form>
     </div>
 

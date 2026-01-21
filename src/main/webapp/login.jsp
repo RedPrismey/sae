@@ -44,7 +44,7 @@
     </form>
 
     <div class="signup-link">
-        Pas encore de compte ? <a href="signup.jsp">S'inscrire</a>
+        Pas encore de compte ? <a href="sign_up.jsp">S'inscrire</a>
     </div>
 </div>
 
