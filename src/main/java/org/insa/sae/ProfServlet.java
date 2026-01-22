@@ -1,6 +1,9 @@
 package org.insa.sae;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,113 +18,147 @@ import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/prof")
 public class ProfServlet extends HttpServlet {
-
+    @Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String action = request.getParameter("action");
+    
+    if ("deleteComment".equals(action)) {
+        try {
+            int evalId = Integer.parseInt(request.getParameter("id"));
+            String sql = "DELETE FROM evaluations WHERE id = ?";
+            try (Connection c = DBConnection.getConnection();
+                 PreparedStatement ps = c.prepareStatement(sql)) {
+                ps.setInt(1, evalId);
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+   
+    doGet(request, response);
+}
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
-        String role = (String) session.getAttribute("role");
-
-        // Sécurité : uniquement enseignants
-        if (role == null || !role.equals("Prof")) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
+        
+       
+        Object userObj = session.getAttribute("user");
+        User prof = null;
 
         try {
-            /*
-             * ============================
-             * Modules du professeur
-             * ============================
-             */
-            // Exemple simulé (à remplacer par DAO)
-            List<String> modules = new ArrayList<>();
-            modules.add("Java Avancé");
-            modules.add("Bases de Données");
-            modules.add("Réseaux");
-
-            request.setAttribute("modulesList", modules);
-
+            if (userObj instanceof User) {
+                
+                prof = (User) userObj;
+            } else if (userObj instanceof String) {
+               
+                prof = User.findByUsername((String) userObj);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        /*
-         * ============================
-         * Module sélectionné
-         * ============================
-         */
-        String moduleName = request.getParameter("module");
-        request.setAttribute("moduleName", moduleName);
-
-        if (moduleName != null && !moduleName.isEmpty()) {
-
-            /*
-             * ============================
-             * Notes des étudiants
-             * ============================
-             */
-            // Données simulées
-            List<String> notesList = new ArrayList<>();
-            notesList.add("Dupont Jean:15");
-            notesList.add("Martin Alice:17");
-            notesList.add("Diallo Amadou:12");
-
-            request.setAttribute("notesList", notesList);
-
-            /*
-             * ============================
-             * Évaluations
-             * ============================
-             */
-            Map<String, Object> evalData = new HashMap<>();
-
-            evalData.put("oneStar", 1);
-            evalData.put("twoStars", 2);
-            evalData.put("threeStars", 4);
-            evalData.put("fourStars", 6);
-            evalData.put("fiveStars", 5);
-
-            int total = 1 + 2 + 4 + 6 + 5;
-            double avg = (1 * 1 + 2 * 2 + 3 * 4 + 4 * 6 + 5 * 5) / (double) total;
-
-            evalData.put("totalEvaluations", total);
-            evalData.put("averageRating", String.format("%.2f", avg));
-
-            /*
-             * ============================
-             * Commentaires
-             * ============================
-             */
-            List<Map<String, String>> comments = new ArrayList<>();
-
-            Map<String, String> c1 = new HashMap<>();
-            c1.put("studentName", "Alice Martin");
-            c1.put("rating", "5");
-            c1.put("comment", "Cours très clair et bien expliqué");
-            c1.put("date", "2025-01-10");
-
-            Map<String, String> c2 = new HashMap<>();
-            c2.put("studentName", "Jean Dupont");
-            c2.put("rating", "4");
-            c2.put("comment", "Bon contenu mais rythme rapide");
-            c2.put("date", "2025-01-11");
-
-            comments.add(c1);
-            comments.add(c2);
-
-            evalData.put("comments", comments);
-
-            request.setAttribute("evaluationData", evalData);
+       
+        if (prof == null || prof.getRole() != Role.teacher) {
+            response.sendRedirect("login.jsp");
+            return;
         }
+       
 
-        /*
-         * ============================
-         * Affichage
-         * ============================
-         */
-        request.getRequestDispatcher("WEB-INF/prof_dashboard.jsp")
-                .forward(request, response);
+        try {
+            
+            List<ModuleEntity> modules = ModuleEntity.findByTeacher(prof.getId());
+            request.setAttribute("modulesList", modules);
+
+           
+            String moduleIdStr = request.getParameter("module");
+            
+            if (moduleIdStr != null && !moduleIdStr.isEmpty()) {
+                int moduleId = Integer.parseInt(moduleIdStr);
+                
+                ModuleEntity currentModule = ModuleEntity.findById(moduleId);
+                
+                if(currentModule != null && currentModule.getTeacherId() == prof.getId()) {
+                     request.setAttribute("selectedModuleId", moduleId);
+                     
+                   
+                     List<String> notesList = new ArrayList<>();
+                     String sqlNotes = "SELECT u.name, u.surname, n.note " +
+                                       "FROM notes n " +
+                                       "JOIN users u ON n.id_student = u.id " +
+                                       "WHERE n.id_module = ?";
+                     
+                     try (Connection c = DBConnection.getConnection();
+                          PreparedStatement ps = c.prepareStatement(sqlNotes)) {
+                         ps.setInt(1, moduleId);
+                         try (ResultSet rs = ps.executeQuery()) {
+                             while (rs.next()) {
+                                
+                                 String fullName = rs.getString("surname") + " " + rs.getString("name");
+                                 float note = rs.getFloat("note");
+                                 notesList.add(fullName + ":" + note);
+                             }
+                         }
+                     }
+                     request.setAttribute("notesList", notesList);
+
+                  
+                     Map<String, Object> evalData = new HashMap<>();
+                     int[] stars = new int[6]; 
+                     List<Map<String, String>> comments = new ArrayList<>();
+                     
+                     String sqlEval = "SELECT e.id,e.rating, e.comment, e.created_at, u.name, u.surname " +
+                                      "FROM evaluations e " +
+                                      "JOIN users u ON e.id_student = u.id " +
+                                      "WHERE e.id_module = ? ORDER BY e.created_at DESC";
+
+                     try (Connection c = DBConnection.getConnection();
+                          PreparedStatement ps = c.prepareStatement(sqlEval)) {
+                         ps.setInt(1, moduleId);
+                         try (ResultSet rs = ps.executeQuery()) {
+                             while (rs.next()) {
+                                 int rating = rs.getInt("rating");
+                                 if (rating >= 1 && rating <= 5) {
+                                     stars[rating]++;
+                                 }
+                                 
+                                 String commentText = rs.getString("comment");
+                                 if (commentText != null && !commentText.isEmpty()) {
+                                     Map<String, String> comMap = new HashMap<>();
+                                     comMap.put("id", String.valueOf(rs.getInt("id")));
+                                     comMap.put("studentName", rs.getString("surname") + " " + rs.getString("name"));
+                                     comMap.put("comment", commentText);
+                                     comMap.put("rating", String.valueOf(rating));
+                                     comments.add(comMap);
+                                 }
+                             }
+                         }
+                     }
+                     
+                     int total = stars[1] + stars[2] + stars[3] + stars[4] + stars[5];
+                     double avg = 0.0;
+                     if (total > 0) {
+                         double sum = (1*stars[1] + 2*stars[2] + 3*stars[3] + 4*stars[4] + 5*stars[5]);
+                         avg = sum / total;
+                     }
+
+                     evalData.put("statsArray", stars);
+                     evalData.put("totalEvaluations", total);
+                     evalData.put("averageRating", String.format("%.2f", avg));
+                     evalData.put("comments", comments);
+                     
+                     request.setAttribute("evaluationData", evalData);
+                     
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", e.getMessage());
+        }
+        request.setAttribute("prof", prof);
+        request.getRequestDispatcher("WEB-INF/prof_dashboard.jsp").forward(request, response);
     }
 }

@@ -85,7 +85,7 @@
                 } else { 
                     for (Map<String, Object> note : notes) {
                         String module = (String) note.get("module");
-                        int noteValue = (int) note.get("note");
+                        float noteValue = (float) note.get("note");
                         String enseignant = (String) note.get("enseignant");
                         
                         // Déterminer la classe CSS
@@ -141,7 +141,7 @@
             <button class="btn btn-secondary" onclick="window.history.back()">
                 ← Retour
             </button>
-            <a href="adminDashboard.jsp" class="btn btn-secondary">
+            <a href="admin_dashboard.jsp" class="btn btn-secondary">
                 📊 Tableau de bord
             </a>
         </div>

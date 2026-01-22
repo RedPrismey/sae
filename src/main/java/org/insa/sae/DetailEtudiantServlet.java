@@ -15,17 +15,43 @@ public class DetailEtudiantServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        String studentIdStr = request.getParameter("id");
-        System.out.println("DetailEtudiantServlet - ID étudiant: " + studentIdStr);
+                HttpSession session = request.getSession(false);
+                if (session == null) {
+                    response.sendRedirect("login.jsp");
+                    return;
+                }
         
-        if (studentIdStr == null || studentIdStr.isEmpty()) {
-            response.sendError(400, "ID étudiant manquant");
-            return;
-        }
+                Object userObj = session.getAttribute("user");
+                User loggedUser = null;
         
+                try {
+                    if (userObj instanceof User) {
+                        loggedUser = (User) userObj;
+                    } else if (userObj instanceof String) {
+                       
+                        loggedUser = User.findByUsername((String) userObj);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+        
+                if (loggedUser == null) {
+                    response.sendRedirect("login.jsp");
+                    return;
+                }
+                String studentIdStr = request.getParameter("id");
+        
+                if (studentIdStr == null || studentIdStr.isEmpty()) {
+                    response.sendError(400, "ID étudiant manquant");
+                    return;
+                }
         try {
             int studentId = Integer.parseInt(studentIdStr);
-            
+
+            if (loggedUser.getRole() == Role.student && loggedUser.getId() != studentId) {
+                response.sendError(403, "Accès interdit à ce dossier étudiant.");
+                return;
+            }
             // 1. Récupérer l'étudiant (User)
             User etudiant = User.findById(studentId);
             if (etudiant == null || etudiant.getRole() != Role.student) {
@@ -67,6 +93,16 @@ public class DetailEtudiantServlet extends HttpServlet {
             request.setAttribute("stats", stats);
             request.setAttribute("positionClassement", positionClassement);
             request.setAttribute("modulesDifficulte", modulesDifficulte);
+
+            String dashboardLink = "login.jsp"; 
+            if (loggedUser.getRole() == Role.admin) {
+                dashboardLink = "admin";
+            } else if (loggedUser.getRole() == Role.student) {
+                dashboardLink = "etudiant";
+            } else if (loggedUser.getRole() == Role.teacher) {
+                dashboardLink = "prof";
+            }
+            request.setAttribute("dashboardLink", dashboardLink);
             
             // 9. Afficher la page de détail
             request.getRequestDispatcher("/detailEtudiant.jsp").forward(request, response);
@@ -114,6 +150,8 @@ public class DetailEtudiantServlet extends HttpServlet {
                 Map<String, Object> noteDetail = new HashMap<>();
                 noteDetail.put("id", note.getId());
                 noteDetail.put("valeur", note.getNote());
+                noteDetail.put("coefficient", note.getCoef()); 
+                noteDetail.put("type", note.getType());
                 
                 // Récupérer les infos du module
                 ModuleEntity module = ModuleEntity.findById(note.getModuleId());
@@ -170,12 +208,12 @@ public class DetailEtudiantServlet extends HttpServlet {
         }
         
         double somme = 0;
-        int meilleure = Integer.MIN_VALUE;
-        int pire = Integer.MAX_VALUE;
+        float meilleure = Float.MIN_VALUE;
+        float pire = Float.MAX_VALUE;
         int nbProblematiques = 0;
         
         for (Map<String, Object> note : notes) {
-            int valeur = (int) note.get("valeur");
+            float valeur = (float) note.get("valeur");
             somme += valeur;
             
             if (valeur > meilleure) meilleure = valeur;
@@ -202,31 +240,32 @@ public class DetailEtudiantServlet extends HttpServlet {
         return stats;
     }
     
-    /**
-     * Calcule la position dans le classement général
-     */
+    
     private int getPositionClassement(int studentId) throws SQLException {
-        // Récupérer tous les étudiants avec leurs moyennes
+       
         List<Map<String, Object>> etudiants = new ArrayList<>();
-        List<User> users = User.findAll();
+        List<Inscription> inscriptions = Inscription.findAll(); 
         
-        if (users != null) {
-            for (User user : users) {
-                if (user.getRole() == Role.student) {
-                    Map<String, Object> etudiant = new HashMap<>();
-                    etudiant.put("id", user.getId());
+        if (inscriptions != null) {
+            for (Inscription inscription : inscriptions) {
                     
-                    // Calculer la moyenne
-                    List<Note> notes = getNotesByStudent(user.getId());
+                    Map<String, Object> etudiantMap = new HashMap<>();
+                    
+                   
+                    int currentStudentId = inscription.getStudentId();
+                    
+                    etudiantMap.put("id", currentStudentId);
+                    
+                  
+                    List<Note> notes = getNotesByStudent(currentStudentId);
                     double moyenne = calculerMoyenne(notes);
-                    etudiant.put("moyenne", moyenne);
+                    etudiantMap.put("moyenne", moyenne);
                     
-                    etudiants.add(etudiant);
-                }
+                    etudiants.add(etudiantMap);
             }
         }
         
-        // Trier par moyenne décroissante
+        
         Collections.sort(etudiants, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> a, Map<String, Object> b) {
@@ -238,6 +277,7 @@ public class DetailEtudiantServlet extends HttpServlet {
         
         // Trouver la position
         for (int i = 0; i < etudiants.size(); i++) {
+            
             if ((int) etudiants.get(i).get("id") == studentId) {
                 return i + 1; // Position (1-indexed)
             }
@@ -288,11 +328,16 @@ public class DetailEtudiantServlet extends HttpServlet {
     private double calculerMoyenne(List<Note> notes) {
         if (notes == null || notes.isEmpty()) return 0.0;
         
-        double somme = 0;
+        double sommePonderee = 0;
+        double sommeCoefs = 0;
+        
         for (Note note : notes) {
-            somme += note.getNote();
+            sommePonderee += (note.getNote() * note.getCoef());
+            sommeCoefs += note.getCoef();
         }
-        return somme / notes.size();
+        
+        if (sommeCoefs == 0) return 0.0;
+        return sommePonderee / sommeCoefs;
     }
     
     /**

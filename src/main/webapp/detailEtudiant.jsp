@@ -164,7 +164,7 @@
                 if (notes != null && !notes.isEmpty()) {
                     for (Map<String, Object> note : notes) {
                         String moduleNom = (String) note.get("moduleNom");
-                        int valeur = (int) note.get("valeur");
+                        float valeur = (float) note.get("valeur");
                         double coefficient = (double) note.get("coefficient");
                         String type = (String) note.get("type");
                         String enseignant = (String) note.get("enseignantNom");
@@ -208,17 +208,14 @@
             <a href="GenererBulletinServlet?id=${etudiant.id}" class="btn btn-primary" target="_blank">
                 📄 Générer le bulletin
             </a>
-            <a href="adminDashboard.jsp" class="btn btn-secondary">
+            <a href="${dashboardLink}" class="btn btn-secondary">
                 ← Retour au dashboard
-            </a>
-            <a href="StatsServlet?type=classement" class="btn" style="background-color: #28a745; color: white;">
-                🏆 Voir le classement
             </a>
         </div>
     </div>
     
     <script>
-        // Script pour exporter les données (optionnel)
+       
         function exporterDonnees() {
             const data = {
                 etudiant: "${etudiant.surname} ${etudiant.name}",

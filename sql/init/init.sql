@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS module (
 
 CREATE TABLE IF NOT EXISTS notes (
   id SERIAL PRIMARY KEY,
-  note INTEGER NOT NULL,
+  note FLOAT NOT NULL,
+  type VARCHAR(255) NOT NULL,
+  coef FLOAT NOT NULL,
   id_student INTEGER REFERENCES users(id) NOT NULL,
   id_module INTEGER REFERENCES module(id) NOT NULL
 );
@@ -48,4 +50,9 @@ CREATE TABLE IF NOT EXISTS evaluation_criteria (
   id_module INTEGER REFERENCES module(id) NOT NULL,
   criterion_name VARCHAR(255) NOT NULL,
   average_rating DECIMAL(3, 2)
+);
+CREATE TABLE IF NOT EXISTS specialty_modules (
+  id_module INTEGER REFERENCES module(id) ON DELETE CASCADE,
+  id_specialty INTEGER REFERENCES specialties(id) ON DELETE CASCADE,
+  PRIMARY KEY (id_module, id_specialty)
 );

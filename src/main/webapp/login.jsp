@@ -16,15 +16,15 @@
     </style>
 </head>
 <body>
+    
+<div class="login-container">
+    <h2 style="text-align: center;">Connexion</h2>
     <%-- Gestion du message de déconnexion --%>
     <% if (request.getParameter("logout") != null) { %>
         <div style="color: green; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 15px; text-align: center; border-radius: 5px;">
             Vous avez été déconnecté avec succès.
         </div>
     <% } %>
-<div class="login-container">
-    <h2 style="text-align: center;">Connexion</h2>
-
     <% if (request.getAttribute("errorMessage") != null) { %>
         <div class="error"><%= request.getAttribute("errorMessage") %></div>
     <% } %>

@@ -1,6 +1,10 @@
 package org.insa.sae;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,5 +92,20 @@ public class ModuleEntity {
             ps.executeUpdate();
         }
         this.id = 0;
+    }
+
+    public static List<ModuleEntity> findByTeacher(int teacherId) throws SQLException {
+        String sql = "SELECT id, name, teacher FROM module WHERE teacher = ? ORDER BY name";
+        List<ModuleEntity> list = new ArrayList<>();
+        Connection c = DBConnection.getConnection();
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, teacherId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(fromResultSet(rs)); 
+                }
+            }
+        }
+        return list;
     }
 }

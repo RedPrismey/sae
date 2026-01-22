@@ -1,10 +1,5 @@
 package org.insa.sae;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.insa.sae.Inscription;
-import org.insa.sae.ModuleEntity;
-import org.insa.sae.Note;
-import org.insa.sae.Specialty;
-import org.insa.sae.User;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class GenererBulletinServlet
@@ -38,7 +34,24 @@ public class GenererBulletinServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		
+		HttpSession session = request.getSession();
+        Object userObj = session.getAttribute("user");
+        User loggedUser = null;
+
+        try {
+            if (userObj instanceof User) {
+                loggedUser = (User) userObj;
+            } else if (userObj instanceof String) {
+                loggedUser = User.findByUsername((String) userObj);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (loggedUser == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
 		String studentIdStr = request.getParameter("id");
 		if (studentIdStr == null || studentIdStr.isEmpty()) {
 			response.sendError(400,"ID étudiant manquant");
@@ -86,41 +99,53 @@ public class GenererBulletinServlet extends HttpServlet {
 	}
 
 	private List<Map<String,Object>> getNotesModules(int studentId) throws SQLException{
-		List<Map<String,Object>> result = new ArrayList<>();
-		List<Note> notes = Note.findAll();
-		for (Note n: notes) {
-			if (n.getStudentId() == studentId) {
-				Map<String,Object> notedetail = new HashMap<>();
-				notedetail.put("id", n.getId());
-				notedetail.put("valeur", n.getNote());
-				ModuleEntity module = ModuleEntity.findById(n.getModuleId());
-				if (module != null) {
-					notedetail.put("moduleId", module.getId());
-					notedetail.put("module", module.getName());
-					User enseignant = User.findById(module.getTeacherId());
-					if (enseignant != null) {
-						notedetail.put("enseignant", enseignant.getSurname() + " " + enseignant.getName());
-					}
-				}else {
-					notedetail.put("module", "module inconnu");
-				}
-				result.add(notedetail);
-			}
-		}
-		return result;
-	}
-	
-	private double calculerMoyenne(List<Map<String,Object>> notes) {
-		if (notes.isEmpty()) return 0.0;
-		double somme = 0;
-		int nbr_note = 0;
-		for (Map<String,Object> note : notes) {
-			double valeur = (double) note.get("valeur");
-			somme += valeur;
-			nbr_note += 1;
-		}
-		return somme/nbr_note;
-	}
+        List<Map<String,Object>> result = new ArrayList<>();
+        List<Note> notes = Note.findAll();
+        for (Note n: notes) {
+            if (n.getStudentId() == studentId) {
+                Map<String,Object> notedetail = new HashMap<>();
+                notedetail.put("id", n.getId());
+                
+                notedetail.put("note", n.getNote()); 
+                
+                notedetail.put("type", n.getType()); 
+                notedetail.put("coef", n.getCoef()); 
+                
+                ModuleEntity module = ModuleEntity.findById(n.getModuleId());
+                
+                if (module != null) {
+                    notedetail.put("moduleId", module.getId());
+                    notedetail.put("module", module.getName());
+                    User enseignant = User.findById(module.getTeacherId());
+                    if (enseignant != null) {
+                        notedetail.put("enseignant", enseignant.getSurname() + " " + enseignant.getName());
+                    }
+                } else {
+                    notedetail.put("module", "module inconnu");
+                }
+                result.add(notedetail);
+            }
+        }
+        return result;
+    }
+    
+    private double calculerMoyenne(List<Map<String,Object>> notes) {
+        if (notes.isEmpty()) return 0.0;
+        
+        double sommePonderee = 0;
+        double sommeCoefs = 0;
+        
+        for (Map<String,Object> note : notes) {
+            float valeur = (float) note.get("note"); 
+            double coef = (double) note.get("coef");
+            
+            sommePonderee += (valeur * coef);
+            sommeCoefs += coef;
+        }
+        
+        if (sommeCoefs == 0) return 0.0;
+        return sommePonderee / sommeCoefs;
+    }
 	
 	private Inscription getInscription(int studentId) throws SQLException{
 		List<Inscription> inscription = Inscription.findAll();
