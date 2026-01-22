@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <meta charset="UTF-8">
     <title>Bulletin de Notes - ${etudiant.surname} ${etudiant.name}</title>
     <style>

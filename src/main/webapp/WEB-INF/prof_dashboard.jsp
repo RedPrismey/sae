@@ -7,6 +7,7 @@
 <html>
 
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Dashboard Enseignant</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -78,6 +79,9 @@
 <body>
 
     <div class="sidebar">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="assets/logo.svg" alt="Logo Pronte" width="80" height="80">
+        </div>
         <h3>Enseignant</h3>
         <p>
             Bienvenue, 

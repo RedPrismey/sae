@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Pronte - Accueil</title>
     <style>
         body { font-family: Arial, sans-serif; background:#f4f6fb; display:flex; align-items:center; justify-content:center; height:100vh; }
@@ -12,6 +13,9 @@
 </head>
 <body>
 <div class="box">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="assets/logo.svg" alt="Logo Pronte" width="80" height="80">
+    </div>
     <h1>Bienvenue sur Pronte</h1>
     <p>Accédez rapidement :</p>
     <a class="button" href="login.jsp">Se connecter</a>

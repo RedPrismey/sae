@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Connexion - Pronte</title>
     <style>
         body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; }
@@ -18,6 +19,9 @@
 <body>
     
 <div class="login-container">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="assets/logo.svg" alt="Logo Pronte" width="80" height="80">
+    </div>
     <h2 style="text-align: center;">Connexion</h2>
     <%-- Gestion du message de déconnexion --%>
     <% if (request.getParameter("logout") != null) { %>

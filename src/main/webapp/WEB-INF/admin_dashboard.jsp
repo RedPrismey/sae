@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <script>
         function confirmerSuppression(type, id) {
             if(confirm("Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.")) {
@@ -91,6 +92,9 @@
 <body>
 
 <div class="sidebar">
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="assets/logo.svg" alt="Logo Pronte" width="80" height="80">
+    </div>
     <h3>Administration</h3>
     <p>Bienvenue Admin</p>
     <hr>

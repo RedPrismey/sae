@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Statistiques - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
