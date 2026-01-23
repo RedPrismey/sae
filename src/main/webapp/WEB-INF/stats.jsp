@@ -7,7 +7,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png" />
     <title>Statistiques - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -100,6 +100,10 @@
 <body>
 
 <div class="sidebar">
+    <a href="${pageContext.request.contextPath}/index.jsp">
+        <img src="${pageContext.request.contextPath}/images/Papillon.png" alt="Papillon" height="50"/>
+        <h3>Pronte</h3>
+    </a>
     <h3>Administration</h3>
     <a href="admin">← Retour Dashboard</a>
     <hr>

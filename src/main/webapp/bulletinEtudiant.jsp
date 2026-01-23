@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png?v=2" />
     <title>Bulletin de Notes - ${etudiant.surname} ${etudiant.name}</title>
     <style>
         :root {

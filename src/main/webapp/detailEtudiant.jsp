@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png?v=2" />
     <title>Détails Étudiant - ${etudiant.surname} ${etudiant.name}</title>
     <style>
         :root {
@@ -184,6 +184,10 @@
 </head>
 <body>
     <div class="container">
+        <a href="${pageContext.request.contextPath}/index.jsp">
+            <img src="${pageContext.request.contextPath}/images/Papillon.png" alt="Papillon" height="50"/>
+            <h3>Pronte</h3>
+        </a>
         <div class="header">
             <h1>👨‍🎓 Détails de l'Étudiant</h1>
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">

@@ -3,8 +3,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Connexion - Pronte</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png?v=2" />
     <style>
         :root {
             --col-midnight: #090446;
@@ -153,7 +153,10 @@
     
 <div class="login-container">
     <div class="logo-container">
-        <img src="assets/logo.svg" alt="Logo Pronte" width="80" height="80">
+        <a href="${pageContext.request.contextPath}/index.jsp">
+            <img src="${pageContext.request.contextPath}/images/Papillon.png" alt="Papillon" height="50"/>
+            <h3>Pronte</h3>
+        </a>
     </div>
     <h2>Connexion</h2>
 

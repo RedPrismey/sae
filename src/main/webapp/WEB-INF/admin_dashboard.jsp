@@ -7,8 +7,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
     <title>Dashboard Admin</title>
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png" />
     <script>
         function confirmerSuppression(type, id) {
             if(confirm("Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.")) {
@@ -277,7 +277,10 @@
 
 <div class="sidebar">
     <div style="text-align: center; margin-bottom: 30px;">
-        <img src="assets/logo.svg" alt="Logo" width="80" height="80" style="filter: brightness(0) invert(1);">
+        <a href="${pageContext.request.contextPath}/index.jsp">
+            <img src="${pageContext.request.contextPath}/images/Papillon.png" alt="Papillon" height="50"/>
+            <h3>Pronte</h3>
+        </a>
     </div>
     <h3>Administration</h3>
     <p>Espace Admin</p>

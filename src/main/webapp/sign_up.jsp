@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/images/Papillon.png?v=2" />
     <title>Inscription - Pronte</title>
     <style>
         :root {
@@ -130,7 +130,10 @@
 
 <div class="signup-container">
     <div style="text-align: center; margin-bottom: 20px;">
-        <img src="assets/logo.svg" alt="Logo" width="60" height="60">
+        <a href="${pageContext.request.contextPath}/index.jsp">
+            <img src="${pageContext.request.contextPath}/images/Papillon.png" alt="Papillon" height="50"/>
+            <h3>Pronte</h3>
+        </a>
     </div>
     <h2>Créer un compte</h2>
 
